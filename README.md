@@ -25,7 +25,7 @@ Let's open a new terminal and try talking to them by using HTTP API below.
 $ curl http://localhost:3001/blocks
 ```
 
-#### To add the second peer:
+#### To connect the first peer and the second peer:
 ```
 $ curl http://localhost:3001/add-peer -d "host=localhost" -d "port=6002"
 ```
