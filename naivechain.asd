@@ -1,4 +1,4 @@
-(defsystem :naivechain
+(defsystem :cl-naivechain
   :class :package-inferred-system
   :version "0.0.1"
   :author "ihuku"
