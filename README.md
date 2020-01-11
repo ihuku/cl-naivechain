@@ -16,7 +16,7 @@ $ ros exec naivechain 3002 6002
 ```
 
 Now two peers are started.
-Let's try talking to them by using API below.
+Let's open new terminal and try talking to them by using API below.
 
 #### To get Blockchain of the first peer:
 ```
