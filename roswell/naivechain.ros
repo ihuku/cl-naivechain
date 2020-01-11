@@ -1,0 +1,22 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '(:ironclad :swank-client :hunchentoot :naivechain)
+                           :silent t))
+
+(defpackage :ros.script.naivechain.3787712837
+  (:use :cl))
+(in-package :ros.script.naivechain.3787712837)
+
+;(defun main (&rest argv)
+(defun main (api-port p2p-port)
+  (setf naivechain:*api-port* (parse-integer api-port))
+  (setf naivechain:*p2p-port* (parse-integer p2p-port))
+  (naivechain:start-api-server)
+  (naivechain:start-p2p-server)
+  (loop (sleep 1)))
+;;; vim: set ft=lisp lisp:
