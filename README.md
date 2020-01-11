@@ -23,14 +23,14 @@ Let's try talking to them by using API below.
 $ curl http://localhost:3001/blocks
 ```
 
-#### To get connected peers:
-```
-$ curl http://localhost:3001/peers
-```
-
 #### To add the second peer:
 ```
 $ curl http://localhost:3001/add-peer -d "host=localhost" -d "port=6002"
+```
+
+#### To get connected peers:
+```
+$ curl http://localhost:3001/peers
 ```
 
 #### To mine a new block:
