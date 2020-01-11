@@ -1,6 +1,8 @@
-# cl-naivechain
-A simple Blockchain implementation in Common Lisp.
+# CL-Naivechain
+A simple blockchain implementation in Common Lisp.
 Inspired by https://github.com/lhartikk/naivechain.
+
+Of cause this code is less than 200 lines!
 
 ### How to Play
 ```
@@ -15,8 +17,8 @@ Open another terminal, then
 $ ros exec naivechain 3002 6002
 ```
 
-Now two peers are started.
-Let's open new terminal and try talking to them by using API below.
+Now, two peers are started.
+Let's open a new terminal and try talking to them by using HTTP API below.
 
 #### To get Blockchain of the first peer:
 ```
