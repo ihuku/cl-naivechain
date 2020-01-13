@@ -18,5 +18,5 @@ exec ros -Q -- $0 "$@"
   (setf naivechain:*p2p-port* (parse-integer p2p-port))
   (naivechain:start-api-server)
   (naivechain:start-p2p-server)
-  (loop (sleep 1)))
+  ;(loop (sleep 1)))
 ;;; vim: set ft=lisp lisp:

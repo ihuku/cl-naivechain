@@ -4,6 +4,9 @@
 
 (in-package :naivechain)
 
+
+;;;; Blockchain
+
 (defstruct (naiveblock (:conc-name nil))
   index prevhash timestamp data hash)
 
@@ -36,14 +39,13 @@
     (calculate-hash index prevhash timestamp data)))
 
 (defun valid-block-p (new-block previous-block)
-  (cond
-    ((not (= (index new-block) (1+ (index previous-block))))
-     (format t "invalid index") nil)
-    ((not (equal (prevhash new-block) (hash previous-block)))
-     (format t "invalid previous hash") nil)
-    ((not (equal (hash new-block) (calculate-hash-for-block new-block)))
-     (format t "invalid new block") nil)
-    (t t)))
+  (cond ((not (= (index new-block) (1+ (index previous-block))))
+         (format t "invalid index") nil)
+        ((not (equal (prevhash new-block) (hash previous-block)))
+         (format t "invalid previous hash") nil)
+        ((not (equal (hash new-block) (calculate-hash-for-block new-block)))
+         (format t "invalid new block") nil)
+        (t t)))
 
 (defun add-block (new-block)
   (when (valid-block-p new-block (get-latest-block))
@@ -61,6 +63,9 @@
       :data data
       :hash (calculate-hash index prevhash timestamp data))))
 
+
+;;;; P2P
+
 (defvar *p2p-port* 6001)
 
 (defvar *peers* '())
@@ -71,6 +76,7 @@
   (push (make-peer :host host :port port) *peers*))
 
 (defun start-p2p-server ()
+  (setf swank:*configure-emacs-indentation* nil)
   (swank:create-server :port *p2p-port* :dont-close t :style :spawn))
 
 (defun send-message (message peer)
@@ -79,6 +85,9 @@
 
 (defun broadcast-message (message)
   (mapc (lambda (to) (send-message message to)) *peers*))
+
+
+;;;; HTTP API
 
 (defvar *api-port* 3001)
 
