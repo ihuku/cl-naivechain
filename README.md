@@ -5,16 +5,18 @@ Inspired by https://github.com/lhartikk/naivechain.
 Of cause this code is less than 200 lines!
 
 ### How to Play
+
+Install and start a peer:
+
 ```
 $ ros install ihuku/cl-naivechain
-$ ros exec naivechain 3001 6001
+$ API_PORT=3001 P2P_PORT=6001 ros exec naivechain
 ```
-`3001` is the port number for API, and `6001` is for P2P.
 
-Open another terminal, then
+Open another terminal. Then
 
 ```
-$ ros exec naivechain 3002 6002
+$ API_PORT=3002 P2P_PORT=6002 ros exec naivechain
 ```
 
 Now, two peers are started.
@@ -27,7 +29,7 @@ $ curl http://localhost:3001/blocks
 
 #### To connect the first peer and the second peer:
 ```
-$ curl http://localhost:3001/add-peer -d "host=localhost" -d "port=6002"
+$ curl http://localhost:3001/add-peer -d "address=localhost" -d "port=6002"
 ```
 
 #### To get connected peers:
