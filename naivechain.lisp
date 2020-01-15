@@ -45,7 +45,9 @@
          (format t "invalid previous hash") nil)
         ((not (equal (hash new-block) (calculate-hash-for-block new-block)))
          (format t "invalid new block") nil)
-        (t t))) (defun add-block (new-block)
+        (t t)))
+
+(defun add-block (new-block)
   (when (valid-block-p new-block (get-latest-block))
     (push new-block *blockchain*)))
 
