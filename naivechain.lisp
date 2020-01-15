@@ -1,6 +1,6 @@
 (defpackage naivechain
   (:use :cl)
-  (:export :*api-port* :start-api-server :*p2p-port* :start-p2p-server))
+  (:export :start-api-server :start-p2p-server))
 
 (in-package :naivechain)
 
@@ -45,9 +45,7 @@
          (format t "invalid previous hash") nil)
         ((not (equal (hash new-block) (calculate-hash-for-block new-block)))
          (format t "invalid new block") nil)
-        (t t)))
-
-(defun add-block (new-block)
+        (t t))) (defun add-block (new-block)
   (when (valid-block-p new-block (get-latest-block))
     (push new-block *blockchain*)))
 
@@ -66,21 +64,25 @@
 
 ;;;; P2P
 
-(defvar *p2p-port* 6001)
+(defparameter *p2p-port* nil)
+(defparameter *p2p-address* nil)
 
 (defvar *peers* '())
 
-(defstruct (peer (:conc-name nil)) host port)
+(defstruct (peer (:conc-name nil)) address port)
 
-(defun add-peer (host port)
-  (push (make-peer :host host :port port) *peers*))
+(defun add-peer (address port)
+  (push (make-peer :address address :port port) *peers*))
 
-(defun start-p2p-server ()
-  (setf swank:*configure-emacs-indentation* nil)
-  (swank:create-server :port *p2p-port* :dont-close t :style :spawn))
+(defun start-p2p-server (p2p-port p2p-address)
+  (setf *p2p-port* p2p-port)
+  (setf *p2p-address* p2p-address)
+  (setf swank::*loopback-interface* p2p-address)
+  (add-peer *p2p-address* *p2p-port*) ; Add myself into *peers*
+  (swank:create-server :port p2p-port :dont-close t :style :spawn))
 
 (defun send-message (message peer)
-  (swank-client:with-slime-connection (connection (host peer) (port peer))
+  (swank-client:with-slime-connection (connection (address peer) (port peer))
     (swank-client:slime-eval message connection)))
 
 (defun broadcast-message (message)
@@ -89,10 +91,9 @@
 
 ;;;; HTTP API
 
-(defvar *api-port* 3001)
-
-(defun start-api-server ()
-  (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port *api-port*)))
+(defun start-api-server (api-port)
+  (setf *api-port* api-port)
+  (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port api-port)))
 
 (hunchentoot:define-easy-handler (blocks-handler :uri "/blocks") ()
   (setf (hunchentoot:content-type*) "text/plain")
@@ -108,9 +109,13 @@
   (setf (hunchentoot:content-type*) "text/plain")
   (format nil "~A~%" *peers*))
 
-(hunchentoot:define-easy-handler (add-peer-handler :uri "/add-peer") (host port)
-  (let ((port (parse-integer port)))
-    (broadcast-message `(add-peer ,host ,port))
-    (add-peer host port)
-    (setf (hunchentoot:content-type*) "text/plain")
-    (format nil "~A~%" *peers*)))
+(hunchentoot:define-easy-handler (add-peer-handler :uri "/add-peer")
+                                 (address port)
+  (multiple-value-bind (port-val terminated-at) (parse-integer port)
+    (if (< terminated-at (length port))
+      (format t "Invalid port value: ~A~%" port)
+      (progn
+        ;(broadcast-message `(add-peer ,host ,port))
+        (add-peer address port-val)
+        (setf (hunchentoot:content-type*) "text/plain")
+        (format nil "~A~%" *peers*)))))
