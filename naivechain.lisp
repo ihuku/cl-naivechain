@@ -73,14 +73,20 @@
 
 (defstruct (peer (:conc-name nil)) address port)
 
-(defun add-peer (address port)
-  (push (make-peer :address address :port port) *peers*))
+(defun connect-peers (address port)
+  (let* ((new-peer (make-peer :address address :port port))
+         (new-peers (send-message '*peers* new-peer)))
+    (setf *peers* (remove-duplicates (append *peers* new-peers) :test #'equalp))
+    (let ((myself (make-peer :address *p2p-address* :port *p2p-port*)))
+      ;; sync *peers* for all peers
+      (loop for peer in (remove-if (lambda (p) (equalp p myself)) *peers*)
+        do (send-message `(setf *peers* (quote ,*peers*)) peer)))))
 
 (defun start-p2p-server (p2p-port p2p-address)
   (setf *p2p-port* p2p-port)
   (setf *p2p-address* p2p-address)
   (setf swank::*loopback-interface* p2p-address)
-  (add-peer *p2p-address* *p2p-port*) ; Add myself into *peers*
+  (push (make-peer :address *p2p-address* :port *p2p-port*) *peers*) ; Add myself into *peers*
   (swank:create-server :port p2p-port :dont-close t :style :spawn))
 
 (defun send-message (message peer)
@@ -117,7 +123,6 @@
     (if (< terminated-at (length port))
       (format t "Invalid port value: ~A~%" port)
       (progn
-        ;(broadcast-message `(add-peer ,host ,port))
-        (add-peer address port-val)
+        (connect-peers address port-val)
         (setf (hunchentoot:content-type*) "text/plain")
         (format nil "~A~%" *peers*)))))

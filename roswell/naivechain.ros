@@ -6,7 +6,7 @@ exec ros -Q -- $0 "$@"
 (progn ;;init forms
   (ros:ensure-asdf)
   #+quicklisp(ql:quickload
-               '(:ironclad :swank-client :hunchentoot :cl-naivechain :uiop)
+               '(:ironclad :swank-client :hunchentoot :cl-naivechain)
                :silent t))
 
 (defpackage :ros.script.cl-naivechain.3787889801
@@ -18,29 +18,35 @@ exec ros -Q -- $0 "$@"
 (defparameter *p2p-address* "127.0.0.1")
 
 (defun print-usage-and-quit ()
-  (format t "Usage: ~%")
+  (format t "~%Usage:~%  ros exec naivechain [--api-port port] [--p2p-port port] [--p2p-address address]~%")
   (ros:quit))
+
+(defun string-getf (plist key)
+  (loop for k in plist by #'cddr
+        for v in (rest plist) by #'cddr
+        when (string= k key)
+        return v))
 
 (defun main (&rest argv)
   (declare (ignorable argv))
-  (let ((api-port-env (uiop:getenv "API_PORT"))
-        (p2p-port-env (uiop:getenv "P2P_PORT"))
-        (p2p-address (uiop:getenv "P2P_ADDRESS")))
+  (let ((api-port-string (string-getf argv "--api"))
+        (p2p-port-string (string-getf argv "--p2p"))
+        (p2p-address (string-getf argv "--address")))
 
-    (when api-port-env
+    (when api-port-string
       (multiple-value-bind
-        (api-port terminated-at) (parse-integer api-port-env :junk-allowed t)
-        (if (< terminated-at (length api-port-env))
-          (format t "Invalid API port: ~A~%" api-port-env)
-          (print-usage-and-quit)
+        (api-port terminated-at) (parse-integer api-port-string :junk-allowed t)
+        (if (< terminated-at (length api-port-string))
+          (progn (format t "Invalid API port: ~A~%" api-port-string)
+                 (print-usage-and-quit))
           (setf *api-port* api-port))))
 
-    (when p2p-port-env
+    (when p2p-port-string
       (multiple-value-bind
-        (p2p-port terminated-at) (parse-integer p2p-port-env :junk-allowed t)
-        (if (< terminated-at (length p2p-port-env))
-          (format t "Invalid P2P port: ~A~%" p2p-port-env)
-          (print-usage-and-quit)
+        (p2p-port terminated-at) (parse-integer p2p-port-string :junk-allowed t)
+        (if (< terminated-at (length p2p-port-string))
+          (progn (format t "Invalid P2P port: ~A~%" p2p-port-string)
+                 (print-usage-and-quit))
           (setf *p2p-port* p2p-port))))
 
     (when p2p-address
