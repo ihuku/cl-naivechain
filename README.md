@@ -10,13 +10,13 @@ Install and start a peer:
 
 ```
 $ ros install ihuku/cl-naivechain
-$ API_PORT=3001 P2P_PORT=6001 ros exec naivechain
+$ ros exec naivechain --api 3001 --p2p 6001
 ```
 
 Open another terminal. Then
 
 ```
-$ API_PORT=3002 P2P_PORT=6002 ros exec naivechain
+$ ros exec naivechain --api 3002 --p2p 6002
 ```
 
 Now, two peers are started.
